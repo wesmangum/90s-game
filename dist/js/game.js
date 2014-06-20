@@ -17,7 +17,7 @@ window.onload = function () {
 
   game.state.start('boot');
 };
-},{"./states/boot":3,"./states/characterselect":4,"./states/gameover":5,"./states/leo":6,"./states/menu":7,"./states/play":8,"./states/preload":9}],2:[function(require,module,exports){
+},{"./states/boot":6,"./states/characterselect":7,"./states/gameover":8,"./states/leo":9,"./states/menu":10,"./states/play":11,"./states/preload":12}],2:[function(require,module,exports){
 'use strict';
 
 var Ground = function(game, x, y, width, height) {
@@ -27,7 +27,6 @@ var Ground = function(game, x, y, width, height) {
   this.autoScroll(-200, 0);
   this.game.physics.arcade.enableBody(this);
   this.body.immovable = true;
-
 };
 
 Ground.prototype = Object.create(Phaser.TileSprite.prototype);
@@ -36,12 +35,107 @@ Ground.prototype.constructor = Ground;
 Ground.prototype.update = function() {
 
   // write your prefab's specific update code here
-
+  
 };
 
 module.exports = Ground;
 
 },{}],3:[function(require,module,exports){
+'use strict';
+
+var Hammer = function(game, x, y, frame) {
+  Phaser.Sprite.call(this, game, x, y, 'hammer', frame);
+  this.anchor.setTo(0.5, 0.5);
+  this.scale.setTo(1.5, 1.5);
+  this.game.physics.arcade.enableBody(this);
+  this.body.immovable = true;
+  this.body.velocity.x = -200;
+  var frames = [];
+  for (var i = 0; i < 80; i++) {
+     frames.push(i);
+  }
+
+  this.animations.add('dance', frames, 10, true);
+  this.animations.play('dance');
+};
+
+Hammer.prototype = Object.create(Phaser.Sprite.prototype);
+Hammer.prototype.constructor = Hammer;
+
+Hammer.prototype.update = function() {
+  this.lookBounds();
+};
+Hammer.prototype.lookBounds = function() {
+   if(!this.inWorld){
+      this.exists = false;
+   }
+};
+
+module.exports = Hammer;
+
+},{}],4:[function(require,module,exports){
+'use strict';
+
+var Obstacle = function(game, x, y, int) {
+   // console.log('obstacle'+int);
+  Phaser.Sprite.call(this, game, x, y, 'obstacle'+int, 1);
+  this.scale.setTo(0.25, 0.25);
+  this.anchor.setTo(0.5, 0.5);
+  this.game.physics.arcade.enableBody(this);
+  this.body.setSize(180, 180, 0, 0);
+
+  this.body.immovable = true;
+  this.body.velocity.x = -200;
+
+  // initialize your prefab here
+
+};
+
+Obstacle.prototype = Object.create(Phaser.Sprite.prototype);
+Obstacle.prototype.constructor = Obstacle;
+
+Obstacle.prototype.update = function() {
+  this.lookBounds();
+};
+
+Obstacle.prototype.lookBounds = function() {
+   if(!this.inWorld){
+      this.exists = false;
+   }
+};
+
+module.exports = Obstacle;
+
+},{}],5:[function(require,module,exports){
+'use strict';
+
+var Pizza = function(game, x, y, frame) {
+  Phaser.Sprite.call(this, game, x, y, 'pizza', frame);
+  this.anchor.setTo(0.5, 0.5);
+  this.scale.setTo(0.4, 0.4);
+  this.game.physics.arcade.enableBody(this);
+  this.game.add.tween(this).to({angle: 10}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+  this.body.immovable = true;
+  this.body.velocity.x = -200;
+
+};
+
+Pizza.prototype = Object.create(Phaser.Sprite.prototype);
+Pizza.prototype.constructor = Pizza;
+
+Pizza.prototype.update = function() {
+   this.lookBounds();
+};
+
+Pizza.prototype.lookBounds = function () {
+   if(!this.inWorld){
+      this.exists = false;
+   }
+}
+
+module.exports = Pizza;
+
+},{}],6:[function(require,module,exports){
 
 'use strict';
 
@@ -63,7 +157,7 @@ Boot.prototype = {
 
 module.exports = Boot;
 
-},{}],4:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 
 'use strict';
 function Menu() {}
@@ -125,7 +219,7 @@ Menu.prototype = {
 
 module.exports = Menu;
 
-},{}],5:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 
 'use strict';
 function GameOver() {}
@@ -147,62 +241,145 @@ GameOver.prototype = {
   },
   update: function () {
     if(this.game.input.activePointer.justPressed()) {
-      this.game.state.start('play');
+      this.game.state.start('menu');
     }
   }
 };
 module.exports = GameOver;
 
-},{}],6:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 
 'use strict';
 function Menu() {}
 
 var Ground = require('../prefabs/ground');
+var Obstacle = require('../prefabs/obstacle');
+var Hammer = require('../prefabs/hammer');
+var Pizza = require('../prefabs/pizza');
 
 Menu.prototype = {
   preload: function() {
 
   },
   create: function() {
-   //  this.style = { font: '20px Arial', fill: '#ffffff', align: 'center'};
+    var style = { font: '20px Arial', fill: '#ffffff', align: 'center'};
    //  this.background = new Background(this.game, 0, 0, this.game.width, this.game.height);
 
     this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
     this.background.autoScroll(-20, 0);
+
     this.leo = this.game.add.sprite(100, this.game.height/2, 'leo2');
     this.leo.anchor.setTo(0.5, 0.5);
     this.leo.scale.setTo(0.4, 0.4);
-    this.game.add.tween(this.leo).to({angle: 20}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
     this.game.physics.arcade.enableBody(this.leo);
+    this.leo.body.setSize(180, 180, 0, 0);
+    this.game.add.tween(this.leo).to({angle: 20}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+
+    this.obstacles = this.game.add.group();
+    this.hammers = this.game.add.group();
+    this.pizzas = this.game.add.group();
 
     this.ground = new Ground(this.game, 0, this.game.height - 50, this.game.width, 112);
     this.game.add.existing(this.ground);
 
+    this.instructionsText = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'Use your arrow keys to move!', style);
+    this.instructionsText.setShadow(2, 3, 'black');
+    this.instructionsText.anchor.setTo(0.5, 0.5);
+
+    this.isStarted = false;
+
+    this.BGMusic = this.game.add.audio('leoSong');
+
     this.cursors = this.game.input.keyboard.createCursorKeys();
   },
   update: function() {
-     this.game.physics.arcade.collide(this.leo, this.ground);
+     this.game.physics.arcade.collide(this.leo, this.ground, this.deathHandler, null, this);
+     this.obstacles.forEach(function (obstacle) {
+        this.game.physics.arcade.collide(this.leo, obstacle, this.deathHandler, null, this);
+     }, this);
+     this.hammers.forEach(function (hammer) {
+        this.game.physics.arcade.collide(this.leo, hammer, this.deathHandler, null, this);
+     }, this);
      this.leo.body.velocity.x = 0;
      this.leo.body.velocity.y = 0;
-     var speed = 175;
+     var speed = 200;
 
      if (this.cursors.left.isDown) {
+        this.checkStart();
         this.leo.body.velocity.x =  -(speed);
      } else if (this.cursors.right.isDown) {
+        this.checkStart();
         this.leo.body.velocity.x = speed;
      }
-      if (this.cursors.up.isDown) {
+     if (this.cursors.up.isDown) {
+        this.checkStart();
         this.leo.body.velocity.y =  -(speed);
-     }else if (this.cursors.down.isDown) {
+     } else if (this.cursors.down.isDown) {
+        this.checkStart();
         this.leo.body.velocity.y = speed;
+     }
+  },
+  render: function () {
+    this.game.debug.body(this.leo);
+  },
+  generateObstacles: function () {
+     var y = this.game.rnd.integerInRange(50, 500);
+     var int = this.game.rnd.integerInRange(1, 5);
+     var obstacleCheck = this.obstacles.getFirstExists(false);
+     if(obstacleCheck) {
+        obstacleCheck.destroy();
+     }
+     var obstacle = new Obstacle(this.game, this.game.width, y, int);
+     this.obstacles.add(obstacle);
+  },
+  generateHammers: function () {
+     var hammerCheck = this.hammers.getFirstExists(false);
+     if (hammerCheck) {
+        hammerCheck.destroy();
+     }
+     var hammer  = new Hammer(this.game, this.game.width, this.game.height - 110);
+     this.hammers.add(hammer);
+  },
+  generatePizzas: function () {
+     var y = this.game.rnd.integerInRange(50, 500);
+     var pizzaCheck = this.pizzas.getFirstExists(false);
+     if (pizzaCheck) {
+        pizzaCheck.destroy();
+     }
+     var pizza  = new Pizza(this.game, this.game.width, y);
+     pizza.fireRate = this.game.time.events.loop(Phaser.Timer.SECOND * 1.5, this.fireSlices, this);
+     pizza.fireRate.timer.start();
+     this.pizzas.add(pizza);
+  },
+  fireSlices: function () {
+     var pizzas = this.pizzas;
+     console.log(pizzas);
+     console.log('fire!');
+  },
+  deathHandler: function () {
+     this.leo.destroy();
+     this.obstacles.destroy();
+     this.BGMusic.stop();
+     this.game.state.start('gameover');
+  },
+  checkStart: function () {
+     if (!this.isStarted) {
+        this.isStarted = true;
+        this.obstacleGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 2, this.generateObstacles, this);
+        this.hammerGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 5, this.generateHammers, this);
+        this.pizzaGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 11, this.generatePizzas, this);
+        this.obstacleGenerator.timer.start();
+        this.hammerGenerator.timer.start();
+        this.pizzaGenerator.timer.start();
+        this.instructionsText.destroy();
+      //   this.BGMusic.play();
      }
   }
 };
 
 module.exports = Menu;
 
-},{"../prefabs/ground":2}],7:[function(require,module,exports){
+},{"../prefabs/ground":2,"../prefabs/hammer":3,"../prefabs/obstacle":4,"../prefabs/pizza":5}],10:[function(require,module,exports){
 
 'use strict';
 function Menu() {}
@@ -241,7 +418,7 @@ Menu.prototype = {
 
 module.exports = Menu;
 
-},{}],8:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 
   'use strict';
   function Play() {}
@@ -268,7 +445,7 @@ module.exports = Menu;
   };
   
   module.exports = Play;
-},{}],9:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 
 'use strict';
 function Preload() {
@@ -290,6 +467,14 @@ Preload.prototype = {
     this.load.image('pizza', 'assets/pizza.jpg');
     this.load.image('background', 'assets/bg1.jpg');
     this.load.image('ground', 'assets/ground.png');
+    this.load.image('obstacle1', 'assets/apple.png');
+    this.load.image('obstacle2', 'assets/microsoft.png');
+    this.load.image('obstacle3', 'assets/n64.png');
+    this.load.image('obstacle4', 'assets/nick.png');
+    this.load.image('obstacle5', 'assets/mtv.jpeg');
+    this.load.spritesheet('hammer', 'assets/mchammer.png', 56, 82);
+
+    this.load.audio('leoSong', 'assets/leo.mp3');
 
   },
   create: function() {
