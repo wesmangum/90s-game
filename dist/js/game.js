@@ -17,7 +17,7 @@ window.onload = function () {
 
   game.state.start('boot');
 };
-},{"./states/boot":6,"./states/characterselect":7,"./states/gameover":8,"./states/leo":9,"./states/menu":10,"./states/play":11,"./states/preload":12}],2:[function(require,module,exports){
+},{"./states/boot":8,"./states/characterselect":9,"./states/gameover":10,"./states/leo":11,"./states/menu":12,"./states/play":13,"./states/preload":14}],2:[function(require,module,exports){
 'use strict';
 
 var Ground = function(game, x, y, width, height) {
@@ -46,8 +46,9 @@ module.exports = Ground;
 var Hammer = function(game, x, y, frame) {
   Phaser.Sprite.call(this, game, x, y, 'hammer', frame);
   this.anchor.setTo(0.5, 0.5);
-  this.scale.setTo(1.5, 1.5);
+  this.scale.setTo(1.4, 1.4);
   this.game.physics.arcade.enableBody(this);
+  this.body.setSize(35, 60, 0, 0);
   this.body.immovable = true;
   this.body.velocity.x = -200;
   var frames = [];
@@ -77,18 +78,14 @@ module.exports = Hammer;
 'use strict';
 
 var Obstacle = function(game, x, y, int) {
-   // console.log('obstacle'+int);
   Phaser.Sprite.call(this, game, x, y, 'obstacle'+int, 1);
   this.scale.setTo(0.25, 0.25);
-  this.anchor.setTo(0.5, 0.5);
+  this.anchor.setTo(0.4, 0.4);
   this.game.physics.arcade.enableBody(this);
-  this.body.setSize(180, 180, 0, 0);
+  this.body.setSize(250, 250, 0, 0);
 
   this.body.immovable = true;
   this.body.velocity.x = -200;
-
-  // initialize your prefab here
-
 };
 
 Obstacle.prototype = Object.create(Phaser.Sprite.prototype);
@@ -112,9 +109,10 @@ module.exports = Obstacle;
 var Pizza = function(game, x, y, frame) {
   Phaser.Sprite.call(this, game, x, y, 'pizza', frame);
   this.anchor.setTo(0.5, 0.5);
-  this.scale.setTo(0.4, 0.4);
+  this.scale.setTo(0.3, 0.3);
   this.game.physics.arcade.enableBody(this);
   this.game.add.tween(this).to({angle: 10}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+  this.body.setSize(180, 180, 0, 0);
   this.body.immovable = true;
   this.body.velocity.x = -200;
 
@@ -131,11 +129,101 @@ Pizza.prototype.lookBounds = function () {
    if(!this.inWorld){
       this.exists = false;
    }
-}
+};
 
 module.exports = Pizza;
 
 },{}],6:[function(require,module,exports){
+'use strict';
+
+var Scoreboard = function(game, x, y, frame) {
+
+  var gameover;
+
+  Phaser.Group.call(this, game);
+
+  this.scoreboard = this.create(this.game.width / 2, 200, 'scoreboard');
+  this.scoreboard.anchor.setTo(0.5, 0.5);
+
+  gameover = this.create(this.game.width / 2, 100, 'gameover');
+  gameover.anchor.setTo(0.5, 0.5);
+  gameover.scale.setTo(0.5, 0.5);
+
+  this.textScore = this.game.add.bitmapText(this.scoreboard.width - 325, 175, 'font', 'Score:', 16);
+  this.add(this.textScore);
+
+  this.scoreText = this.game.add.bitmapText(this.scoreboard.width - 325, 200, 'font', '', 16);
+  this.add(this.scoreText);
+
+
+  this.startText = this.game.add.bitmapText(this.scoreboard.width - 320 , 275, 'font', 'Click to retry', 12);
+  this.add(this.startText);
+
+  this.startButton = this.game.add.button((this.game.width/2) - 125, 325, 'startButton', this.startClick, this);
+  this.startButton.anchor.setTo(0.5, 0.5);
+  this.add(this.startButton);
+
+  this.pic = this.game.add.sprite(200, 90, 'leoDead');
+  this.add(this.pic);
+  var frames =[];
+  for (var i = 0; i < 23; i++) {
+     frames.push(i);
+  }
+  this.pic.animations.add('play', frames, 12, true);
+  this.pic.animations.play('play');
+
+  this.y = this.game.height;
+  this.x = 0;
+};
+
+Scoreboard.prototype = Object.create(Phaser.Group.prototype);
+Scoreboard.prototype.constructor = Scoreboard;
+
+Scoreboard.prototype.update = function() {
+
+};
+
+Scoreboard.prototype.startClick = function(character) {
+   this.game.state.start('characterselect');
+};
+
+Scoreboard.prototype.show = function(score) {
+   this.scoreText.setText(score.toString());
+   this.game.add.tween(this).to({y: 50}, 1000, Phaser.Easing.Bounce.Out, true);
+};
+
+module.exports = Scoreboard;
+
+},{}],7:[function(require,module,exports){
+'use strict';
+
+var Slice = function(game, x, y) {
+  Phaser.Sprite.call(this, game, x, y, 'slice');
+  this.anchor.setTo(0.5, 0.5);
+  this.scale.setTo(0.1, 0.1);
+  this.game.physics.arcade.enableBody(this);
+  this.body.immovable = true;
+  this.body.setSize(200, 200, 0, 0);
+
+
+};
+
+Slice.prototype = Object.create(Phaser.Sprite.prototype);
+Slice.prototype.constructor = Slice;
+
+Slice.prototype.update = function() {
+   this.lookBounds();
+};
+
+Slice.prototype.lookBounds = function () {
+   if(!this.inWorld){
+      this.exists = false;
+   }
+};
+
+module.exports = Slice;
+
+},{}],8:[function(require,module,exports){
 
 'use strict';
 
@@ -157,7 +245,7 @@ Boot.prototype = {
 
 module.exports = Boot;
 
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 
 'use strict';
 function Menu() {}
@@ -219,7 +307,7 @@ Menu.prototype = {
 
 module.exports = Menu;
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 
 'use strict';
 function GameOver() {}
@@ -247,21 +335,24 @@ GameOver.prototype = {
 };
 module.exports = GameOver;
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 
 'use strict';
-function Menu() {}
+function Leo() {}
 
 var Ground = require('../prefabs/ground');
 var Obstacle = require('../prefabs/obstacle');
 var Hammer = require('../prefabs/hammer');
 var Pizza = require('../prefabs/pizza');
+var Slice = require('../prefabs/slice');
+var Scoreboard = require('../prefabs/scoreboard');
 
-Menu.prototype = {
+Leo.prototype = {
   preload: function() {
 
   },
   create: function() {
+    this.game.physics.startSystem(Phaser.Physics.ARCADE);
     var style = { font: '20px Arial', fill: '#ffffff', align: 'center'};
    //  this.background = new Background(this.game, 0, 0, this.game.width, this.game.height);
 
@@ -278,6 +369,7 @@ Menu.prototype = {
     this.obstacles = this.game.add.group();
     this.hammers = this.game.add.group();
     this.pizzas = this.game.add.group();
+    this.slices = this.game.add.group();
 
     this.ground = new Ground(this.game, 0, this.game.height - 50, this.game.width, 112);
     this.game.add.existing(this.ground);
@@ -290,6 +382,9 @@ Menu.prototype = {
 
     this.BGMusic = this.game.add.audio('leoSong');
 
+    this.score = 0;
+    this.scoreText = this.game.add.bitmapText(this.game.width/2, 10, 'font', this.score.toString(), 24);
+
     this.cursors = this.game.input.keyboard.createCursorKeys();
   },
   update: function() {
@@ -300,9 +395,15 @@ Menu.prototype = {
      this.hammers.forEach(function (hammer) {
         this.game.physics.arcade.collide(this.leo, hammer, this.deathHandler, null, this);
      }, this);
+     this.pizzas.forEach(function (pizza) {
+        this.game.physics.arcade.collide(this.leo, pizza, this.deathHandler, null, this);
+     }, this);
+     this.slices.forEach(function (slice) {
+        this.game.physics.arcade.collide(this.leo, slice, this.deathHandler, null, this);
+     }, this);
      this.leo.body.velocity.x = 0;
      this.leo.body.velocity.y = 0;
-     var speed = 200;
+     var speed = 300;
 
      if (this.cursors.left.isDown) {
         this.checkStart();
@@ -319,9 +420,21 @@ Menu.prototype = {
         this.leo.body.velocity.y = speed;
      }
   },
-  render: function () {
-    this.game.debug.body(this.leo);
-  },
+  // render: function () {
+  //   this.game.debug.body(this.leo);
+  //   this.obstacles.forEach(function (obstacle) {
+  //      this.game.debug.body(obstacle);
+  //   }, this);
+  //   this.pizzas.forEach(function (pizza) {
+  //      this.game.debug.body(pizza);
+  //   }, this);
+  //   this.hammers.forEach(function (hammer) {
+  //      this.game.debug.body(hammer);
+  //   }, this);
+  //   this.slices.forEach(function (slice) {
+  //      this.game.debug.body(slice);
+  //   }, this);
+  // },
   generateObstacles: function () {
      var y = this.game.rnd.integerInRange(50, 500);
      var int = this.game.rnd.integerInRange(1, 5);
@@ -347,20 +460,42 @@ Menu.prototype = {
         pizzaCheck.destroy();
      }
      var pizza  = new Pizza(this.game, this.game.width, y);
-     pizza.fireRate = this.game.time.events.loop(Phaser.Timer.SECOND * 1.5, this.fireSlices, this);
+     pizza.fireRate = this.game.time.events.loop(Phaser.Timer.SECOND * 2, this.fireSlices, this);
      pizza.fireRate.timer.start();
      this.pizzas.add(pizza);
   },
   fireSlices: function () {
-     var pizzas = this.pizzas;
-     console.log(pizzas);
-     console.log('fire!');
+     var sliceCheck = this.slices.getFirstExists(false);
+     if (sliceCheck) {
+        sliceCheck.destroy();
+     }
+     this.pizzas.forEach(function (pizza) {
+        var slice = new Slice(this.game, pizza.world.x, pizza.world.y);
+        slice.rotation = this.game.physics.arcade.moveToObject(slice, this.leo, 400);
+        this.slices.add(slice);
+     }, this);
+  },
+  scorePoint: function () {
+     this.score++;
+     this.scoreText.setText(this.score.toString());
   },
   deathHandler: function () {
      this.leo.destroy();
+     this.scoreText.destroy();
      this.obstacles.destroy();
+     this.pizzas.destroy();
+     this.hammers.destroy();
+     this.ground.stopScroll();
+     this.background.stopScroll();
+     this.obstacleGenerator.timer.stop();
+     this.hammerGenerator.timer.stop();
+     this.pizzaGenerator.timer.stop();
+     this.scoring.timer.stop();
      this.BGMusic.stop();
-     this.game.state.start('gameover');
+     this.scoreboard = new Scoreboard(this.game);
+     this.game.add.existing(this.scoreboard);
+     this.scoreboard.show(this.score);
+   //   this.game.state.start('gameover');
   },
   checkStart: function () {
      if (!this.isStarted) {
@@ -368,18 +503,27 @@ Menu.prototype = {
         this.obstacleGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 2, this.generateObstacles, this);
         this.hammerGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 5, this.generateHammers, this);
         this.pizzaGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 11, this.generatePizzas, this);
+        this.scoring = this.game.time.events.loop(Phaser.Timer.SECOND * 0.25, this.scorePoint, this);
         this.obstacleGenerator.timer.start();
         this.hammerGenerator.timer.start();
         this.pizzaGenerator.timer.start();
+        this.scoring.timer.start();
         this.instructionsText.destroy();
-      //   this.BGMusic.play();
+        this.BGMusic.play();
      }
+  },
+  shutdown: function () {
+     this.leo.destroy();
+     this.obstacles.destroy();
+     this.pizzas.destroy();
+     this.hammers.destroy();
+     this.scoreboard.destroy();
   }
 };
 
-module.exports = Menu;
+module.exports = Leo;
 
-},{"../prefabs/ground":2,"../prefabs/hammer":3,"../prefabs/obstacle":4,"../prefabs/pizza":5}],10:[function(require,module,exports){
+},{"../prefabs/ground":2,"../prefabs/hammer":3,"../prefabs/obstacle":4,"../prefabs/pizza":5,"../prefabs/scoreboard":6,"../prefabs/slice":7}],12:[function(require,module,exports){
 
 'use strict';
 function Menu() {}
@@ -411,14 +555,13 @@ Menu.prototype = {
 
   },
   startClick: function () {
-     console.log('start!');
      this.game.state.start('characterselect');
   }
 };
 
 module.exports = Menu;
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 
   'use strict';
   function Play() {}
@@ -445,7 +588,7 @@ module.exports = Menu;
   };
   
   module.exports = Play;
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 
 'use strict';
 function Preload() {
@@ -465,6 +608,7 @@ Preload.prototype = {
     this.load.image('leo', 'assets/leo1.png');
     this.load.image('leo2', 'assets/leo2.png');
     this.load.image('pizza', 'assets/pizza.jpg');
+    this.load.image('slice', 'assets/pizza-slice.png');
     this.load.image('background', 'assets/bg1.jpg');
     this.load.image('ground', 'assets/ground.png');
     this.load.image('obstacle1', 'assets/apple.png');
@@ -473,6 +617,11 @@ Preload.prototype = {
     this.load.image('obstacle4', 'assets/nick.png');
     this.load.image('obstacle5', 'assets/mtv.jpeg');
     this.load.spritesheet('hammer', 'assets/mchammer.png', 56, 82);
+    this.load.spritesheet('leoDead', 'assets/leodead.png', 400, 180);
+    this.load.bitmapFont('font', 'assets/font.png', 'assets/font.fnt');
+    this.load.image('scoreboard', 'assets/scoreboard.png');
+    this.load.image('gameover', 'assets/gameover.png');
+    this.load.image('startButton', 'assets/start.png');
 
     this.load.audio('leoSong', 'assets/leo.mp3');
 

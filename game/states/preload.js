@@ -17,6 +17,7 @@ Preload.prototype = {
     this.load.image('leo', 'assets/leo1.png');
     this.load.image('leo2', 'assets/leo2.png');
     this.load.image('pizza', 'assets/pizza.jpg');
+    this.load.image('slice', 'assets/pizza-slice.png');
     this.load.image('background', 'assets/bg1.jpg');
     this.load.image('ground', 'assets/ground.png');
     this.load.image('obstacle1', 'assets/apple.png');
@@ -25,6 +26,11 @@ Preload.prototype = {
     this.load.image('obstacle4', 'assets/nick.png');
     this.load.image('obstacle5', 'assets/mtv.jpeg');
     this.load.spritesheet('hammer', 'assets/mchammer.png', 56, 82);
+    this.load.spritesheet('leoDead', 'assets/leodead.png', 400, 180);
+    this.load.bitmapFont('font', 'assets/font.png', 'assets/font.fnt');
+    this.load.image('scoreboard', 'assets/scoreboard.png');
+    this.load.image('gameover', 'assets/gameover.png');
+    this.load.image('startButton', 'assets/start.png');
 
     this.load.audio('leoSong', 'assets/leo.mp3');
 

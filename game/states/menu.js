@@ -29,7 +29,6 @@ Menu.prototype = {
 
   },
   startClick: function () {
-     console.log('start!');
      this.game.state.start('characterselect');
   }
 };

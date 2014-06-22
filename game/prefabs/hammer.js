@@ -3,8 +3,9 @@
 var Hammer = function(game, x, y, frame) {
   Phaser.Sprite.call(this, game, x, y, 'hammer', frame);
   this.anchor.setTo(0.5, 0.5);
-  this.scale.setTo(1.5, 1.5);
+  this.scale.setTo(1.4, 1.4);
   this.game.physics.arcade.enableBody(this);
+  this.body.setSize(35, 60, 0, 0);
   this.body.immovable = true;
   this.body.velocity.x = -200;
   var frames = [];
