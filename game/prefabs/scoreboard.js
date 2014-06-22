@@ -27,14 +27,14 @@ var Scoreboard = function(game, x, y, frame) {
   this.startButton.anchor.setTo(0.5, 0.5);
   this.add(this.startButton);
 
-  this.pic = this.game.add.sprite(200, 90, 'leoDead');
-  this.add(this.pic);
-  var frames =[];
-  for (var i = 0; i < 23; i++) {
-     frames.push(i);
-  }
-  this.pic.animations.add('play', frames, 12, true);
-  this.pic.animations.play('play');
+  // this.pic = this.game.add.sprite(200, 90, 'leoDead');
+  // this.add(this.pic);
+  // var frames =[];
+  // for (var i = 0; i < 23; i++) {
+  //    frames.push(i);
+  // }
+  // this.pic.animations.add('play', frames, 12, true);
+  // this.pic.animations.play('play');
 
   this.y = this.game.height;
   this.x = 0;
