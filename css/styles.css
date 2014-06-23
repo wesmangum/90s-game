@@ -9,3 +9,11 @@ body {
   margin: auto;
   cursor: pointer;
 }
+
+#highscore {
+	position: absolute;
+	width: 200px;
+	height: 100px;
+	top: 50px;
+	right:100px;
+}

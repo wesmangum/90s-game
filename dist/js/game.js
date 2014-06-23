@@ -7,8 +7,10 @@ window.onload = function () {
 
   // Game States
   game.state.add('boot', require('./states/boot'));
+  game.state.add('brittney', require('./states/brittney'));
   game.state.add('characterselect', require('./states/characterselect'));
   game.state.add('gameover', require('./states/gameover'));
+  game.state.add('justin', require('./states/justin'));
   game.state.add('leo', require('./states/leo'));
   game.state.add('menu', require('./states/menu'));
   game.state.add('play', require('./states/play'));
@@ -17,7 +19,7 @@ window.onload = function () {
 
   game.state.start('boot');
 };
-},{"./states/boot":8,"./states/characterselect":9,"./states/gameover":10,"./states/leo":11,"./states/menu":12,"./states/play":13,"./states/preload":14}],2:[function(require,module,exports){
+},{"./states/boot":8,"./states/brittney":9,"./states/characterselect":10,"./states/gameover":11,"./states/justin":12,"./states/leo":13,"./states/menu":14,"./states/play":15,"./states/preload":16}],2:[function(require,module,exports){
 'use strict';
 
 var Ground = function(game, x, y, width, height) {
@@ -149,17 +151,22 @@ var Scoreboard = function(game, x, y, frame) {
   gameover.anchor.setTo(0.5, 0.5);
   gameover.scale.setTo(0.5, 0.5);
 
-  this.textScore = this.game.add.bitmapText(this.scoreboard.width - 325, 175, 'font', 'Score:', 16);
+  this.textScore = this.game.add.bitmapText(this.game.width/2 - 100, 200, 'font', 'Score: ', 24);
   this.add(this.textScore);
 
-  this.scoreText = this.game.add.bitmapText(this.scoreboard.width - 325, 200, 'font', '', 16);
-  this.add(this.scoreText);
+  // this.scoreText = this.game.add.bitmapText(, 200, 'font', '', 16);
+  // this.add(this.scoreText);
 
+  // this.initialText = this.game.add.bitmapText(this.scoreboard.width - 125, 175, 'font', 'Enter Your Initials', 12);
+  // this.add(this.initialText);
+  // $('#highscore').append('<input id="name", type="text"></input>');
+  // this.firstInitial = this.game.add('<input type="text"></input>');
+  // this.add(this.firstInitial);
 
-  this.startText = this.game.add.bitmapText(this.scoreboard.width - 320 , 275, 'font', 'Click to retry', 12);
+  this.startText = this.game.add.bitmapText(this.scoreboard.width/2 + 60, 275, 'font', 'Click to retry', 12);
   this.add(this.startText);
 
-  this.startButton = this.game.add.button((this.game.width/2) - 125, 325, 'startButton', this.startClick, this);
+  this.startButton = this.game.add.button(this.game.width/2, 325, 'startButton', this.startClick, this);
   this.startButton.anchor.setTo(0.5, 0.5);
   this.add(this.startButton);
 
@@ -188,7 +195,7 @@ Scoreboard.prototype.startClick = function(character) {
 };
 
 Scoreboard.prototype.show = function(score) {
-   this.scoreText.setText(score.toString());
+   this.textScore.setText('Score: ' + score.toString());
    this.game.add.tween(this).to({y: 50}, 1000, Phaser.Easing.Bounce.Out, true);
 };
 
@@ -248,66 +255,298 @@ module.exports = Boot;
 },{}],9:[function(require,module,exports){
 
 'use strict';
-function Menu() {}
+function Brittney() {}
 
-Menu.prototype = {
+var Ground = require('../prefabs/ground');
+var Obstacle = require('../prefabs/obstacle');
+var Hammer = require('../prefabs/hammer');
+var Pizza = require('../prefabs/pizza');
+var Slice = require('../prefabs/slice');
+var Scoreboard = require('../prefabs/scoreboard');
+
+Brittney.prototype = {
+  preload: function() {
+
+  },
+  create: function() {
+    this.game.physics.startSystem(Phaser.Physics.ARCADE);
+    var style = { font: '20px Arial', fill: '#ffffff', align: 'center'};
+
+    this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'britneyBackground');
+    this.background.scale.setTo(1.5, 1.3);
+    this.background.autoScroll(-20, 0);
+
+    this.Brittney = this.game.add.sprite(100, this.game.height/2, 'brittney2');
+    this.Brittney.anchor.setTo(0.5, 0.5);
+    this.Brittney.scale.setTo(0.4, 0.4);
+    this.game.physics.arcade.enableBody(this.Brittney);
+    this.Brittney.body.setSize(180, 180, 0, 0);
+    this.game.add.tween(this.Brittney).to({angle: 20}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+
+    this.obstacles = this.game.add.group();
+    this.hammers = this.game.add.group();
+    this.pizzas = this.game.add.group();
+    this.slices = this.game.add.group();
+
+    this.ground = new Ground(this.game, 0, this.game.height - 50, this.game.width, 112);
+    this.game.add.existing(this.ground);
+
+    this.instructionsText = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'Use your arrow keys to move!', style);
+    this.instructionsText.setShadow(2, 3, 'black');
+    this.instructionsText.anchor.setTo(0.5, 0.5);
+
+    this.isStarted = false;
+
+    this.BGMusic = this.game.add.audio('brittneySong');
+
+    this.score = 0;
+    this.scoreText = this.game.add.bitmapText(this.game.width/2, 10, 'font', this.score.toString(), 24);
+
+    this.cursors = this.game.input.keyboard.createCursorKeys();
+  },
+  update: function() {
+     this.game.physics.arcade.collide(this.Brittney, this.ground, this.deathHandler, null, this);
+     this.obstacles.forEach(function (obstacle) {
+        this.game.physics.arcade.collide(this.Brittney, obstacle, this.deathHandler, null, this);
+     }, this);
+     this.hammers.forEach(function (hammer) {
+        this.game.physics.arcade.collide(this.Brittney, hammer, this.deathHandler, null, this);
+     }, this);
+     this.pizzas.forEach(function (pizza) {
+        this.game.physics.arcade.collide(this.Brittney, pizza, this.deathHandler, null, this);
+     }, this);
+     this.slices.forEach(function (slice) {
+        this.game.physics.arcade.collide(this.Brittney, slice, this.deathHandler, null, this);
+     }, this);
+     this.Brittney.body.velocity.x = 0;
+     this.Brittney.body.velocity.y = 0;
+     var speed = 300;
+
+     if (this.cursors.left.isDown) {
+        this.checkStart();
+        this.Brittney.body.velocity.x =  -(speed);
+     } else if (this.cursors.right.isDown) {
+        this.checkStart();
+        this.Brittney.body.velocity.x = speed;
+     }
+     if (this.cursors.up.isDown) {
+        this.checkStart();
+        this.Brittney.body.velocity.y =  -(speed);
+     } else if (this.cursors.down.isDown) {
+        this.checkStart();
+        this.Brittney.body.velocity.y = speed;
+     }
+  },
+  // render: function () {
+  //   this.game.debug.body(this.Brittney);
+  //   this.obstacles.forEach(function (obstacle) {
+  //      this.game.debug.body(obstacle);
+  //   }, this);
+  //   this.pizzas.forEach(function (pizza) {
+  //      this.game.debug.body(pizza);
+  //   }, this);
+  //   this.hammers.forEach(function (hammer) {
+  //      this.game.debug.body(hammer);
+  //   }, this);
+  //   this.slices.forEach(function (slice) {
+  //      this.game.debug.body(slice);
+  //   }, this);
+  // },
+  generateObstacles: function () {
+     var y = this.game.rnd.integerInRange(50, 500);
+     var int = this.game.rnd.integerInRange(1, 5);
+     var obstacleCheck = this.obstacles.getFirstExists(false);
+     if(obstacleCheck) {
+        obstacleCheck.destroy();
+     }
+     var obstacle = new Obstacle(this.game, this.game.width, y, int);
+     this.obstacles.add(obstacle);
+  },
+  generateHammers: function () {
+     var hammerCheck = this.hammers.getFirstExists(false);
+     if (hammerCheck) {
+        hammerCheck.destroy();
+     }
+     var hammer  = new Hammer(this.game, this.game.width, this.game.height - 110);
+     this.hammers.add(hammer);
+  },
+  generatePizzas: function () {
+     var y = this.game.rnd.integerInRange(50, 500);
+     var pizzaCheck = this.pizzas.getFirstExists(false);
+     if (pizzaCheck) {
+        pizzaCheck.destroy();
+     }
+     var pizza  = new Pizza(this.game, this.game.width, y);
+     pizza.fireRate = this.game.time.events.loop(Phaser.Timer.SECOND * 2, this.fireSlices, this);
+     pizza.fireRate.timer.start();
+     this.pizzas.add(pizza);
+  },
+  fireSlices: function () {
+     var sliceCheck = this.slices.getFirstExists(false);
+     if (sliceCheck) {
+        sliceCheck.destroy();
+     }
+     this.pizzas.forEach(function (pizza) {
+        var slice = new Slice(this.game, pizza.world.x, pizza.world.y);
+        slice.rotation = this.game.physics.arcade.moveToObject(slice, this.Brittney, 400);
+        this.slices.add(slice);
+     }, this);
+  },
+  scorePoint: function () {
+     this.score++;
+     this.scoreText.setText(this.score.toString());
+  },
+  deathHandler: function () {
+     this.Brittney.destroy();
+     this.scoreText.destroy();
+     this.obstacles.destroy();
+     this.pizzas.destroy();
+     this.hammers.destroy();
+     this.ground.stopScroll();
+     this.background.stopScroll();
+     this.obstacleGenerator.timer.stop();
+     this.hammerGenerator.timer.stop();
+     this.pizzaGenerator.timer.stop();
+     this.scoring.timer.stop();
+     this.BGMusic.stop();
+     this.scoreboard = new Scoreboard(this.game);
+     this.game.add.existing(this.scoreboard);
+     this.scoreboard.show(this.score);
+  },
+  checkStart: function () {
+     if (!this.isStarted) {
+        this.isStarted = true;
+        this.obstacleGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 2, this.generateObstacles, this);
+        this.hammerGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 5, this.generateHammers, this);
+        this.pizzaGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 11, this.generatePizzas, this);
+        this.scoring = this.game.time.events.loop(Phaser.Timer.SECOND * 0.25, this.scorePoint, this);
+        this.obstacleGenerator.timer.start();
+        this.hammerGenerator.timer.start();
+        this.pizzaGenerator.timer.start();
+        this.scoring.timer.start();
+        this.instructionsText.destroy();
+        this.BGMusic.play();
+     }
+  },
+  shutdown: function () {
+     this.Brittney.destroy();
+     this.obstacles.destroy();
+     this.pizzas.destroy();
+     this.hammers.destroy();
+     this.scoreboard.destroy();
+  }
+};
+
+module.exports = Brittney;
+
+},{"../prefabs/ground":2,"../prefabs/hammer":3,"../prefabs/obstacle":4,"../prefabs/pizza":5,"../prefabs/scoreboard":6,"../prefabs/slice":7}],10:[function(require,module,exports){
+
+'use strict';
+function CharacterSelect() {}
+
+CharacterSelect.prototype = {
   preload: function() {
 
   },
   create: function() {
     this.style = { font: '20px Arial', fill: '#ffffff', align: 'center'};
     this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'menubg');
-    this.leo = this.game.add.button(this.game.width/2, this.game.height/3, 'leo', this.selectLeo, this);
-    this.leo.anchor.setTo(0.5, 0.5);
-    this.leo.scale.setTo(0.4, 0.4);
-    this.game.add.tween(this.leo).to({angle: 20}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+
+    this.createStars();
+    this.leoText = this.game.add.bitmapText(160, 75, 'font', 'LEO', 24);
+    this.brittneyText = this.game.add.bitmapText(315, 75, 'font', 'BRITTNEY', 24);
+    this.justinText = this.game.add.bitmapText(555, 75, 'font', 'JUSTIN', 24);
 
     this.instructionsText = this.game.add.text(this.game.world.centerX, 400, 'Select your character!', this.style);
     this.instructionsText.setShadow(2, 3, 'black');
     this.instructionsText.anchor.setTo(0.5, 0.5);
-   //  this.startButton = this.game.add.button(this.game.width/2, 200, 'logo', this.startClick, this);
-   //  this.startButton.anchor.setTo(0.5, 0.5);
-   //  this.startButton.scale.setTo(0.75, 0.75);
-   //  this.sprite = this.game.add.sprite(this.game.world.centerX, 200, 'logo');
-   //  this.sprite.scale.setTo(0.75, 0.75);
-   //  this.sprite.anchor.setTo(0.5, 0.5);
-
-   //  this.titleText = this.game.add.text(this.game.world.centerX, 300, '\'Allo, \'Allo!', style);
-   //  this.titleText.anchor.setTo(0.5, 0.5);
-
-   //  this.instructionsText = this.game.add.text(this.game.world.centerX, 400, 'Click the sticker to play!', style);
-   //  this.instructionsText.setShadow(2, 3, 'black');
-   //  this.instructionsText.anchor.setTo(0.5, 0.5);
-   //
-   //  this.game.add.tween(this.startButton).to({y: 190}, 500, Phaser.Easing.Quadratic.InOut, true, 0, 1000, true);
   },
   update: function() {
 
   },
+  createStars: function  () {
+    this.leo = this.game.add.button(this.game.width/4, this.game.height/3, 'leo', this.selectLeo, this);
+    this.leo.anchor.setTo(0.5, 0.5);
+    this.leo.scale.setTo(0.4, 0.4);
+    this.game.add.tween(this.leo).to({angle: 20}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+
+    this.brittney = this.game.add.button(this.game.width/2, 240, 'brittney', this.selectBrittney, this);
+    this.brittney.anchor.setTo(0.5, 0.5);
+    this.brittney.scale.setTo(1.25, 1.25);
+    this.game.add.tween(this.brittney).to({angle: 20}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+
+    this.justin = this.game.add.button(this.game.width - 175, 200, 'justin', this.selectJustin, this);
+    this.justin.anchor.setTo(0.5, 0.5);
+    this.justin.scale.setTo(1.1, 1.1);
+    this.game.add.tween(this.justin).to({angle: 20}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+  },
   selectLeo: function () {
      this.selected = 'leo';
+     this.brittney.kill();
      this.leo.kill();
-     this.leo = this.game.add.sprite(this.game.width/2, this.game.height/3, 'leo2');
+     this.justin.kill();
+     this.createStars();
+     this.createStart();
+     this.leo.kill();
+     this.leo = this.game.add.sprite(this.game.width/4, this.game.height/3, 'leo2');
      this.leo.anchor.setTo(0.5, 0.5);
      this.leo.scale.setTo(0.5, 0.5);
      this.game.add.tween(this.leo).to({angle: 20}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
-
+  },
+  selectBrittney: function () {
+     this.selected = 'brittney';
+     this.brittney.kill();
+     this.leo.kill();
+     this.justin.kill();
+     this.createStars();
+     this.createStart();
+     this.brittney.kill();
+     this.brittney = this.game.add.sprite(this.game.width/2, 220, 'brittney2');
+     this.brittney.anchor.setTo(0.5, 0.5);
+     this.brittney.scale.setTo(0.4, 0.4);
+     this.game.add.tween(this.brittney).to({angle: 20}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+  },
+  selectJustin: function () {
+     this.selected = 'justin';
+     this.justin.kill();
+     this.leo.kill();
+     this.brittney.kill();
+     this.createStars();
+     this.createStart();
+     this.justin.kill();
+     this.justin = this.game.add.sprite(this.game.width - 175, 200, 'justin2');
+     this.justin.anchor.setTo(0.5, 0.5);
+     this.justin.scale.setTo(0.4, 0.4);
+     this.game.add.tween(this.justin).to({angle: 20}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+  },
+  createStart: function  () {
+    if (this.selected) {
+      if (this.start) {
+        this.start.destroy();
+        this.startText.destroy();
+      }
+     this.instructionsText.destroy();
      this.start = this.game.add.button(this.game.width/2, this.game.height - 100, 'pizza', this.startGame, this);
      this.startText = this.game.add.text(this.game.width/2, this.start.game.height - 100, 'START!', this.style);
      this.start.anchor.setTo(0.5, 0.5);
      this.start.scale.setTo(0.5, 0.5);
      this.startText.anchor.setTo(0.5, 0.5);
+   }
   },
   startGame: function () {
       if (this.selected === 'leo') {
-         this.game.state.start('leo');
+        this.game.state.start('leo');
+      } else if (this.selected === 'brittney') {
+        this.game.state.start('brittney');
+      } else if (this.selected === 'justin'){
+        this.game.state.start('justin');
       }
    }
 };
 
-module.exports = Menu;
+module.exports = CharacterSelect;
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 
 'use strict';
 function GameOver() {}
@@ -335,7 +574,194 @@ GameOver.prototype = {
 };
 module.exports = GameOver;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
+
+'use strict';
+function Justin() {}
+
+var Ground = require('../prefabs/ground');
+var Obstacle = require('../prefabs/obstacle');
+var Hammer = require('../prefabs/hammer');
+var Pizza = require('../prefabs/pizza');
+var Slice = require('../prefabs/slice');
+var Scoreboard = require('../prefabs/scoreboard');
+
+Justin.prototype = {
+  preload: function() {
+
+  },
+  create: function() {
+    this.game.physics.startSystem(Phaser.Physics.ARCADE);
+    var style = { font: '20px Arial', fill: '#ffffff', align: 'center'};
+
+    this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'justinBackground');
+    this.background.scale.setTo(1, 1);
+    this.background.autoScroll(-20, 0);
+
+    this.justin = this.game.add.sprite(100, this.game.height/2, 'justin2');
+    this.justin.anchor.setTo(0.5, 0.5);
+    this.justin.scale.setTo(0.4, 0.4);
+    this.game.physics.arcade.enableBody(this.justin);
+    this.justin.body.setSize(180, 180, 0, 0);
+    this.game.add.tween(this.justin).to({angle: 20}, 500, Phaser.Easing.Linear.NONE, true, 0, 1000, true);
+
+    this.obstacles = this.game.add.group();
+    this.hammers = this.game.add.group();
+    this.pizzas = this.game.add.group();
+    this.slices = this.game.add.group();
+
+    this.ground = new Ground(this.game, 0, this.game.height - 50, this.game.width, 112);
+    this.game.add.existing(this.ground);
+
+    this.instructionsText = this.game.add.text(this.game.world.centerX, this.game.world.centerY, 'Use your arrow keys to move!', style);
+    this.instructionsText.setShadow(2, 3, 'black');
+    this.instructionsText.anchor.setTo(0.5, 0.5);
+
+    this.isStarted = false;
+
+    this.BGMusic = this.game.add.audio('justinSong');
+
+    this.score = 0;
+    this.scoreText = this.game.add.bitmapText(this.game.width/2, 10, 'font', this.score.toString(), 24);
+
+    this.cursors = this.game.input.keyboard.createCursorKeys();
+  },
+  update: function() {
+     this.game.physics.arcade.collide(this.justin, this.ground, this.deathHandler, null, this);
+     this.obstacles.forEach(function (obstacle) {
+        this.game.physics.arcade.collide(this.justin, obstacle, this.deathHandler, null, this);
+     }, this);
+     this.hammers.forEach(function (hammer) {
+        this.game.physics.arcade.collide(this.justin, hammer, this.deathHandler, null, this);
+     }, this);
+     this.pizzas.forEach(function (pizza) {
+        this.game.physics.arcade.collide(this.justin, pizza, this.deathHandler, null, this);
+     }, this);
+     this.slices.forEach(function (slice) {
+        this.game.physics.arcade.collide(this.justin, slice, this.deathHandler, null, this);
+     }, this);
+     this.justin.body.velocity.x = 0;
+     this.justin.body.velocity.y = 0;
+     var speed = 300;
+
+     if (this.cursors.left.isDown) {
+        this.checkStart();
+        this.justin.body.velocity.x =  -(speed);
+     } else if (this.cursors.right.isDown) {
+        this.checkStart();
+        this.justin.body.velocity.x = speed;
+     }
+     if (this.cursors.up.isDown) {
+        this.checkStart();
+        this.justin.body.velocity.y =  -(speed);
+     } else if (this.cursors.down.isDown) {
+        this.checkStart();
+        this.justin.body.velocity.y = speed;
+     }
+  },
+  // render: function () {
+  //   this.game.debug.body(this.justin);
+  //   this.obstacles.forEach(function (obstacle) {
+  //      this.game.debug.body(obstacle);
+  //   }, this);
+  //   this.pizzas.forEach(function (pizza) {
+  //      this.game.debug.body(pizza);
+  //   }, this);
+  //   this.hammers.forEach(function (hammer) {
+  //      this.game.debug.body(hammer);
+  //   }, this);
+  //   this.slices.forEach(function (slice) {
+  //      this.game.debug.body(slice);
+  //   }, this);
+  // },
+  generateObstacles: function () {
+     var y = this.game.rnd.integerInRange(50, 500);
+     var int = this.game.rnd.integerInRange(1, 5);
+     var obstacleCheck = this.obstacles.getFirstExists(false);
+     if(obstacleCheck) {
+        obstacleCheck.destroy();
+     }
+     var obstacle = new Obstacle(this.game, this.game.width, y, int);
+     this.obstacles.add(obstacle);
+  },
+  generateHammers: function () {
+     var hammerCheck = this.hammers.getFirstExists(false);
+     if (hammerCheck) {
+        hammerCheck.destroy();
+     }
+     var hammer  = new Hammer(this.game, this.game.width, this.game.height - 110);
+     this.hammers.add(hammer);
+  },
+  generatePizzas: function () {
+     var y = this.game.rnd.integerInRange(50, 500);
+     var pizzaCheck = this.pizzas.getFirstExists(false);
+     if (pizzaCheck) {
+        pizzaCheck.destroy();
+     }
+     var pizza  = new Pizza(this.game, this.game.width, y);
+     pizza.fireRate = this.game.time.events.loop(Phaser.Timer.SECOND * 2, this.fireSlices, this);
+     pizza.fireRate.timer.start();
+     this.pizzas.add(pizza);
+  },
+  fireSlices: function () {
+     var sliceCheck = this.slices.getFirstExists(false);
+     if (sliceCheck) {
+        sliceCheck.destroy();
+     }
+     this.pizzas.forEach(function (pizza) {
+        var slice = new Slice(this.game, pizza.world.x, pizza.world.y);
+        slice.rotation = this.game.physics.arcade.moveToObject(slice, this.justin, 400);
+        this.slices.add(slice);
+     }, this);
+  },
+  scorePoint: function () {
+     this.score++;
+     this.scoreText.setText(this.score.toString());
+  },
+  deathHandler: function () {
+     this.justin.destroy();
+     this.scoreText.destroy();
+     this.obstacles.destroy();
+     this.pizzas.destroy();
+     this.hammers.destroy();
+     this.ground.stopScroll();
+     this.background.stopScroll();
+     this.obstacleGenerator.timer.stop();
+     this.hammerGenerator.timer.stop();
+     this.pizzaGenerator.timer.stop();
+     this.scoring.timer.stop();
+     this.BGMusic.stop();
+     this.scoreboard = new Scoreboard(this.game);
+     this.game.add.existing(this.scoreboard);
+     this.scoreboard.show(this.score);
+  },
+  checkStart: function () {
+     if (!this.isStarted) {
+        this.isStarted = true;
+        this.obstacleGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 2, this.generateObstacles, this);
+        this.hammerGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 5, this.generateHammers, this);
+        this.pizzaGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 11, this.generatePizzas, this);
+        this.scoring = this.game.time.events.loop(Phaser.Timer.SECOND * 0.25, this.scorePoint, this);
+        this.obstacleGenerator.timer.start();
+        this.hammerGenerator.timer.start();
+        this.pizzaGenerator.timer.start();
+        this.scoring.timer.start();
+        this.instructionsText.destroy();
+        this.BGMusic.play();
+     }
+  },
+  shutdown: function () {
+     this.justin.destroy();
+     this.obstacles.destroy();
+     this.pizzas.destroy();
+     this.hammers.destroy();
+     this.scoreboard.destroy();
+  }
+};
+
+module.exports = Justin;
+
+},{"../prefabs/ground":2,"../prefabs/hammer":3,"../prefabs/obstacle":4,"../prefabs/pizza":5,"../prefabs/scoreboard":6,"../prefabs/slice":7}],13:[function(require,module,exports){
 
 'use strict';
 function Leo() {}
@@ -354,9 +780,9 @@ Leo.prototype = {
   create: function() {
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
     var style = { font: '20px Arial', fill: '#ffffff', align: 'center'};
-   //  this.background = new Background(this.game, 0, 0, this.game.width, this.game.height);
 
-    this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
+    this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'leoBackground');
+    this.background.scale.setTo(2, 2);
     this.background.autoScroll(-20, 0);
 
     this.leo = this.game.add.sprite(100, this.game.height/2, 'leo2');
@@ -495,7 +921,6 @@ Leo.prototype = {
      this.scoreboard = new Scoreboard(this.game);
      this.game.add.existing(this.scoreboard);
      this.scoreboard.show(this.score);
-   //   this.game.state.start('gameover');
   },
   checkStart: function () {
      if (!this.isStarted) {
@@ -523,7 +948,7 @@ Leo.prototype = {
 
 module.exports = Leo;
 
-},{"../prefabs/ground":2,"../prefabs/hammer":3,"../prefabs/obstacle":4,"../prefabs/pizza":5,"../prefabs/scoreboard":6,"../prefabs/slice":7}],12:[function(require,module,exports){
+},{"../prefabs/ground":2,"../prefabs/hammer":3,"../prefabs/obstacle":4,"../prefabs/pizza":5,"../prefabs/scoreboard":6,"../prefabs/slice":7}],14:[function(require,module,exports){
 
 'use strict';
 function Menu() {}
@@ -561,7 +986,7 @@ Menu.prototype = {
 
 module.exports = Menu;
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 
   'use strict';
   function Play() {}
@@ -588,7 +1013,7 @@ module.exports = Menu;
   };
   
   module.exports = Play;
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 
 'use strict';
 function Preload() {
@@ -607,9 +1032,17 @@ Preload.prototype = {
     this.load.image('menubg', 'assets/bg2.jpg');
     this.load.image('leo', 'assets/leo1.png');
     this.load.image('leo2', 'assets/leo2.png');
+    this.load.image('brittney', 'assets/brittney1.png');
+    this.load.image('brittney2', 'assets/brittney2.png');
+    this.load.image('justin', 'assets/justin1.png');
+    this.load.image('justin2', 'assets/justin2.png');
     this.load.image('pizza', 'assets/pizza.jpg');
     this.load.image('slice', 'assets/pizza-slice.png');
-    this.load.image('background', 'assets/bg1.jpg');
+    this.load.image('leoBackground', 'assets/bg1.jpg');
+    this.load.image('britneyBackground', 'assets/bg3.png');
+    // this.load.image('justinBackground', 'assets/bg4.jpg');
+    this.load.image('justinBackground', 'assets/bg5.jpg');
+
     this.load.image('ground', 'assets/ground.png');
     this.load.image('obstacle1', 'assets/apple.png');
     this.load.image('obstacle2', 'assets/microsoft.png');
@@ -624,6 +1057,9 @@ Preload.prototype = {
     this.load.image('startButton', 'assets/start.png');
 
     this.load.audio('leoSong', 'assets/leo.mp3');
+    this.load.audio('brittneySong', 'assets/brittney.mp3');
+    this.load.audio('justinSong', 'assets/justin.mp3');
+
 
   },
   create: function() {

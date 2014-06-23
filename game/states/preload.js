@@ -16,9 +16,17 @@ Preload.prototype = {
     this.load.image('menubg', 'assets/bg2.jpg');
     this.load.image('leo', 'assets/leo1.png');
     this.load.image('leo2', 'assets/leo2.png');
+    this.load.image('brittney', 'assets/brittney1.png');
+    this.load.image('brittney2', 'assets/brittney2.png');
+    this.load.image('justin', 'assets/justin1.png');
+    this.load.image('justin2', 'assets/justin2.png');
     this.load.image('pizza', 'assets/pizza.jpg');
     this.load.image('slice', 'assets/pizza-slice.png');
-    this.load.image('background', 'assets/bg1.jpg');
+    this.load.image('leoBackground', 'assets/bg1.jpg');
+    this.load.image('britneyBackground', 'assets/bg3.png');
+    // this.load.image('justinBackground', 'assets/bg4.jpg');
+    this.load.image('justinBackground', 'assets/bg5.jpg');
+
     this.load.image('ground', 'assets/ground.png');
     this.load.image('obstacle1', 'assets/apple.png');
     this.load.image('obstacle2', 'assets/microsoft.png');
@@ -33,6 +41,9 @@ Preload.prototype = {
     this.load.image('startButton', 'assets/start.png');
 
     this.load.audio('leoSong', 'assets/leo.mp3');
+    this.load.audio('brittneySong', 'assets/brittney.mp3');
+    this.load.audio('justinSong', 'assets/justin.mp3');
+
 
   },
   create: function() {

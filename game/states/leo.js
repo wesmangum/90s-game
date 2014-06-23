@@ -16,9 +16,9 @@ Leo.prototype = {
   create: function() {
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
     var style = { font: '20px Arial', fill: '#ffffff', align: 'center'};
-   //  this.background = new Background(this.game, 0, 0, this.game.width, this.game.height);
 
-    this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
+    this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'leoBackground');
+    this.background.scale.setTo(2, 2);
     this.background.autoScroll(-20, 0);
 
     this.leo = this.game.add.sprite(100, this.game.height/2, 'leo2');
@@ -157,7 +157,6 @@ Leo.prototype = {
      this.scoreboard = new Scoreboard(this.game);
      this.game.add.existing(this.scoreboard);
      this.scoreboard.show(this.score);
-   //   this.game.state.start('gameover');
   },
   checkStart: function () {
      if (!this.isStarted) {
